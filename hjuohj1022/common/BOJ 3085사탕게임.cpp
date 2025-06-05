@@ -1,13 +1,15 @@
-#include <iostream>
+ï»¿#include <iostream>
 #include <vector>
-#include <algorithm> // swap ÇÔ¼ö È°¿ë(¹è¿­ÀÇ ÀÎµ¦½º¸¦ ¹Ù²Ş)
+#include <algorithm> // swap í•¨ìˆ˜ í™œìš©(ë°°ì—´ì˜ ì¸ë±ìŠ¤ë¥¼ ë°”ê¿ˆ)
 #include <string> 
+
+// í’€ë•Œ ê°€ì¥ ì¡°ì‹¬í•´ì•¼ í• ê²ƒ = xì¢Œí‘œì™€ yì¢Œí‘œë¥¼ ì˜ ì •ì˜í•˜ê³  í•¨ìˆ˜ í˜¸ì¶œí•  ë•Œ ì¸ìˆ˜ë¥¼ ì˜ ëŒ€ì…í•  ê²ƒ
 
 using namespace std;
 
 int verdict(vector<string> board, int N, int x, int y) {
 	int maxLen = 1, currLen = 1;
-	// ÇàÀ» ÆÇº°
+	// í–‰ì„ íŒë³„
 	for (int i = 1; i < N; i++) {
 		if (board[y][i] == board[y][i - 1])
 			currLen++;
@@ -17,12 +19,12 @@ int verdict(vector<string> board, int N, int x, int y) {
 		}
 		if (maxLen == N) return N;
 	}
-	// ¸¶Áö¸· ¹İº¹¹® ÀÌÈÄ ÃÖ´ë ±æÀÌ¸¦ ÆÇÁ¤ÇÏ±â À§ÇØ »ğÀÔ
+	// ë§ˆì§€ë§‰ ë°˜ë³µë¬¸ ì´í›„ ìµœëŒ€ ê¸¸ì´ë¥¼ íŒì •í•˜ê¸° ìœ„í•´ ì‚½ì…
 	maxLen = max(maxLen, currLen);
 
-	// »õ·Î ÃÖ´ë ±æÀÌ¸¦ ÆÇ´ÜÇÏ±â ¶§¹®¿¡ ÇöÀç ±æÀÌ¸¦ ÃÊ±âÈ­
+	// ìƒˆë¡œ ìµœëŒ€ ê¸¸ì´ë¥¼ íŒë‹¨í•˜ê¸° ë•Œë¬¸ì— í˜„ì¬ ê¸¸ì´ë¥¼ ì´ˆê¸°í™”
 	currLen = 1;
-	// ¿­À» ÆÇº°
+	// ì—´ì„ íŒë³„
 	for (int i = 1; i < N; i++) {
 		if (board[i][x] == board[i - 1][x])
 			currLen++;
@@ -36,7 +38,7 @@ int verdict(vector<string> board, int N, int x, int y) {
 }
 
 int Bomboni(vector<string> board, int N) {
-	// ÀÎÁ¢ÇÑ µÎÄ­À» °í¸£±â À§ÇØ ¼±ÅÃÇÑ ÇÑÄ­ÀÇ ÁÖº¯À» ¼±ÅÃÇÏ±â À§ÇØ dx, dy¸¦ È°¿ë
+	// ì¸ì ‘í•œ ë‘ì¹¸ì„ ê³ ë¥´ê¸° ìœ„í•´ ì„ íƒí•œ í•œì¹¸ì˜ ì£¼ë³€ì„ ì„ íƒí•˜ê¸° ìœ„í•´ dx, dyë¥¼ í™œìš©
 	int dx[4] = { 0, 1, 0, -1 };
 	int dy[4] = { 1, 0, -1, 0 };
 	int max_eat = 0;
@@ -48,11 +50,11 @@ int Bomboni(vector<string> board, int N) {
 				int ny = i + dy[k];
 				if (ny < 0 || ny >= N || nx < 0 || nx >= N) continue;
 
-				// ÀÎÁ¢ÇÑ µÎÄ­ÀÇ »çÅÁÀ» ±³È¯
+				// ì¸ì ‘í•œ ë‘ì¹¸ì˜ ì‚¬íƒ•ì„ êµí™˜
 				swap(board[i][j], board[ny][nx]);
-				int eaten_candy = verdict(board, N, i, j);
+				int eaten_candy = verdict(board, N ,j ,i);
 				max_eat = max(max_eat, eaten_candy);
-				// ´ÙÀ½ ¿¬»êÀ» À§ÇØ ¿ø·¡´ë·Î µ¹·Á³õÀ½
+				// ë‹¤ìŒ ì—°ì‚°ì„ ìœ„í•´ ì›ë˜ëŒ€ë¡œ ëŒë ¤ë†“ìŒ
 				swap(board[i][j], board[ny][nx]);
 			}
 		}
@@ -62,7 +64,7 @@ int Bomboni(vector<string> board, int N) {
 
 
 int main() {
-	// ¹®Á¦¿¡¼­ Á¦°øÇÏ´Â ÀÔ·Â µ¥ÀÌÅÍ¸¦ ÀÔ·Â
+    // ë¬¸ì œì—ì„œ ì œê³µí•˜ëŠ” ì…ë ¥ ë°ì´í„°ë¥¼ ì…ë ¥
 	int N;
 	cin >> N;
 	vector<string> board;
@@ -70,7 +72,7 @@ int main() {
 	for (int i = 0; i < N; i++) {
 		cin >> board[i];
 	}
-	// º½º¸´Ï ÇÔ¼ö È£Ãâ
+	// ë´„ë³´ë‹ˆ í•¨ìˆ˜ í˜¸ì¶œ
 	int result = Bomboni(board, N);
 	cout << result << endl;
 }
