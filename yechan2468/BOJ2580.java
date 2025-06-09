@@ -4,7 +4,7 @@ import java.io.InputStreamReader;
 import java.util.*;
 
 public class BOJ2580 {
-    static int BOARD_SIZE = 9;
+    static final int BOARD_SIZE = 9;
     static int[][] board;
     static int[] tempArray = new int[9];
 
@@ -21,8 +21,6 @@ public class BOJ2580 {
 
         ArrayList<BlankElement> blanks = getBlanks();
 
-        blanks.sort(Comparator.comparingInt(elem -> elem.priority));
-
         int[] lastTried = new int[blanks.size()];
         Arrays.fill(lastTried, 1);
 
@@ -32,8 +30,8 @@ public class BOJ2580 {
             for (int j = lastTried[i]; j <= 9; j++) {
                 board[blank.row][blank.column] = j;
                 if (!validateRow(blank.row)
-                        || !validateColumn(blank.column)
-                        || !validateSquare(blank.row, blank.column)
+                    || !validateColumn(blank.column)
+                    || !validateSquare(blank.row, blank.column)
                 ) {
                     board[blank.row][blank.column] = 0;
                     continue;
@@ -58,7 +56,7 @@ public class BOJ2580 {
         for (int i = 0; i < BOARD_SIZE; i++) {
             for (int j = 0; j < BOARD_SIZE; j++) {
                 if (board[i][j] == 0) {
-                    blanks.add(new BlankElement(i, j, 9));
+                    blanks.add(new BlankElement(i, j));
                 }
             }
         }
@@ -108,12 +106,11 @@ public class BOJ2580 {
     }
 
     static class BlankElement {
-        int row, column, priority;
+        int row, column;
 
-        public BlankElement(int row, int column, int priority) {
+        public BlankElement(int row, int column) {
             this.row = row;
             this.column = column;
-            this.priority = priority;
         }
     }
 }
