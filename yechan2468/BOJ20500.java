@@ -26,7 +26,6 @@ public class BOJ20500 {
     static long modInverse(long x) {
         return BigInteger.valueOf(x)
                 .modPow(BigInteger.valueOf(MOD - 2), BigInteger.valueOf(MOD))
-                .mod(BigInteger.valueOf(MOD))
                 .longValue();
     }
 
