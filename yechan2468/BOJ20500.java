@@ -1,14 +1,16 @@
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.math.BigInteger;
 
 public class BOJ20500 {
+    static int n;
     static long[] factorials;
     static final int MOD = 1_000_000_007;
 
     public static void main(String[] args) throws IOException {
-        int n = Integer.parseInt(new BufferedReader(new InputStreamReader(System.in)).readLine());
-        factorials = new long[n+1];
+        n = Integer.parseInt(new BufferedReader(new InputStreamReader(System.in)).readLine());
+        factorials = getFactorials();
 
         long answer = 0;
         for (int i = 0; i < n; i++) {
@@ -21,27 +23,24 @@ public class BOJ20500 {
         System.out.println(answer);
     }
 
-    static long modPow(long base, long exp) {
-        long result = 1;
-        base %= MOD;
-        while (exp > 0) {
-            if ((exp & 1) == 1) result = (result * base) % MOD;
-            base = (base * base) % MOD;
-            exp >>= 1;
-        }
-        return result;
-    }
-
     static long modInverse(long x) {
-        return modPow(x, MOD - 2);
+        return BigInteger.valueOf(x)
+                .modPow(BigInteger.valueOf(MOD - 2), BigInteger.valueOf(MOD))
+                .mod(BigInteger.valueOf(MOD))
+                .longValue();
     }
 
     static long binomial(int n, int k) {
-        return (getFactorial(n) * modInverse((getFactorial(k) * getFactorial(n - k)) % MOD) % MOD);
+        return factorials[n] * modInverse((factorials[k] * factorials[n - k]) % MOD) % MOD;
     }
 
-    static long getFactorial(int number) {
-        if (number == 0 || number == 1) return 1;
-        return factorials[number] = (getFactorial(number - 1) * number) % MOD;
+    static long[] getFactorials() {
+        long[] factorials = new long[n+1];
+        factorials[0] = factorials[1] = 1;
+        for (int i = 2; i <= n; i++) {
+            factorials[i] = (factorials[i-1] * i) % MOD;
+        }
+
+        return factorials;
     }
 }
