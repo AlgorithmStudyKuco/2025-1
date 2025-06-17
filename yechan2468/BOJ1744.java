@@ -37,7 +37,7 @@ public class BOJ1744 {
                     answer += first + second;
                     i++;
                 }
-            } else if ((first == 0 || first == 1) /* && second > 1 */) {
+            } else if ((first == 0 || first == 1) /* && second >= 0 */) {
                 answer += first;
             } else if (/* first > 1 && */ second > 1) {
                 if ((n - i) % 2 != 0) {
