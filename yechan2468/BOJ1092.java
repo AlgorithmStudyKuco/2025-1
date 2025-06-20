@@ -10,29 +10,12 @@ public class BOJ1092 {
     static Integer[] thresholds, weights;
 
     public static void main(String[] args) throws IOException {
-        BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
-        numCrane = Integer.parseInt(reader.readLine());
-        thresholds = new Integer[numCrane];
-        StringTokenizer tokenizer = new StringTokenizer(reader.readLine());
-        for (int i = 0; i < numCrane; i++) {
-            thresholds[i] = Integer.parseInt(tokenizer.nextToken());
-        }
-        numContainer = Integer.parseInt(reader.readLine());
-        tokenizer = new StringTokenizer(reader.readLine());
-        weights = new Integer[numContainer];
-        for (int i = 0; i < numContainer; i++) {
-            weights[i] = Integer.parseInt(tokenizer.nextToken());
-        }
+        getInputs();
 
         Arrays.sort(thresholds, Collections.reverseOrder());
         Arrays.sort(weights, Collections.reverseOrder());
 
-        int[] pointers = new int[numCrane];
-        int ptr = 0;
-        for (int i = 0; i < numCrane; i++) {
-            while (ptr < numContainer && thresholds[i] < weights[ptr]) ptr++;
-            pointers[i] = ptr;
-        }
+        int[] pointers = getPointers();
 
         int answer;
         int count = 0;
@@ -42,22 +25,60 @@ public class BOJ1092 {
                 break;
             }
 
-            LOOP: for (int i = 0; i < numCrane; i++) {
-                if (pointers[i] == numContainer) continue;
-                while (isShipped[pointers[i]]) {
+            for (int i = 0; i < numCrane; i++) {
+                while (pointers[i] != numContainer && isShipped[pointers[i]]) {
                     pointers[i]++;
-                    if (pointers[i] == numContainer) continue LOOP;
                 }
+                if (pointers[i] == numContainer) continue;
 
-                if (weights[pointers[i]] > thresholds[i]) {
-                    System.out.println(-1);
-                    return;
-                }
+                if (validateIfPossibleToShip(pointers, i)) return;
+
                 isShipped[pointers[i]] = true;
                 count++;
             }
         }
 
         System.out.println(answer > 10000 ? -1 : answer);
+    }
+
+    private static void getInputs() throws IOException {
+        BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
+
+        numCrane = Integer.parseInt(reader.readLine());
+
+        thresholds = new Integer[numCrane];
+        StringTokenizer tokenizer = new StringTokenizer(reader.readLine());
+        for (int i = 0; i < numCrane; i++) {
+            thresholds[i] = Integer.parseInt(tokenizer.nextToken());
+        }
+
+        numContainer = Integer.parseInt(reader.readLine());
+
+        tokenizer = new StringTokenizer(reader.readLine());
+        weights = new Integer[numContainer];
+        for (int i = 0; i < numContainer; i++) {
+            weights[i] = Integer.parseInt(tokenizer.nextToken());
+        }
+    }
+
+    private static int[] getPointers() {
+        int[] pointers = new int[numCrane];
+
+        int ptr = 0;
+        for (int i = 0; i < numCrane; i++) {
+            while (ptr < numContainer && thresholds[i] < weights[ptr]) ptr++;
+            pointers[i] = ptr;
+        }
+
+        return pointers;
+    }
+
+    private static boolean validateIfPossibleToShip(int[] pointers, int i) {
+        if (weights[pointers[i]] > thresholds[i]) {
+            System.out.println(-1);
+            return true;
+        }
+
+        return false;
     }
 }
