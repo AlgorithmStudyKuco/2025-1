@@ -31,7 +31,7 @@ public class BOJ1092 {
                 }
                 if (pointers[i] == numContainer) continue;
 
-                if (validateIfPossibleToShip(pointers, i)) return;
+                if (!validateIfPossibleToShip(pointers, i)) return;
 
                 isShipped[pointers[i]] = true;
                 count++;
@@ -76,9 +76,9 @@ public class BOJ1092 {
     private static boolean validateIfPossibleToShip(int[] pointers, int i) {
         if (weights[pointers[i]] > thresholds[i]) {
             System.out.println(-1);
-            return true;
+            return false;
         }
 
-        return false;
+        return true;
     }
 }
