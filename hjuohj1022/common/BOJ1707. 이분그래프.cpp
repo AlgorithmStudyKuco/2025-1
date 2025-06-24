@@ -39,7 +39,6 @@ int main() {
 				}
 			}
 		}
-
 		cout << (bipartite ? "YES" : "NO") << '\n';
 	}
 	return 0;
