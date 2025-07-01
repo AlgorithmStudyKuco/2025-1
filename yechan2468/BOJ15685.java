@@ -6,61 +6,80 @@ import java.util.List;
 import java.util.StringTokenizer;
 
 public class BOJ15685 {
-    static int n;
-    static int[][] curves;
     static boolean[][] board;
-    static final int LEFT = 1, RIGHT = -1;
-    static final int[] dy = new int[]{0, -1, 0, 1};
-    static final int[] dx = new int[]{1, 0, -1, 0};
-    static List<Integer> histories;
-    static Pos pos;
-    static int dir;
 
     public static void main(String[] args) throws IOException {
-        getInput();
+        Dragon[] dragons = initialize();
 
-        for (int i = 0; i < n; i++) {
-            simulate(curves[i]);
+        for (Dragon dragon : dragons) {
+            dragon.simulate();
         }
 
         System.out.println(countAnswer());
     }
 
-    private static void simulate(int[] curve) {
-        int startX = curve[0], startY = curve[1], startDir = curve[2], generations = curve[3];
-        histories = new ArrayList<>();
+    static class Dragon {
+        private final List<Integer> histories;
+        private final Pos pos;
+        private int dir;
+        private final int generation;
+        private final int[] dy = new int[]{0, -1, 0, 1};
+        private final int[] dx = new int[]{1, 0, -1, 0};
+        private final int LEFT = 1, RIGHT = -1;
 
-        pos = new Pos(startY, startX);
-        dir = startDir;
-        visit(startY, startX);
+        public Dragon(Pos pos, int dir, int generation) {
+            histories = new ArrayList<>();
+            this.pos = pos;
+            this.dir = dir;
+            this.generation = generation;
+            this.visit();
+        }
 
-        move();
-        turn(LEFT);
-
-        for (int gen = 1; gen <= generations; gen++) {
-            int len = histories.size();
-            for (int i = len - 2; i >= 0; i--) {
-                move();
-                turn(histories.get(i) == LEFT ? RIGHT : LEFT);
-            }
+        public void simulate() {
             move();
             turn(LEFT);
+
+            for (int gen = 1; gen <= generation; gen++) {
+                int len = histories.size();
+                for (int i = len - 2; i >= 0; i--) {
+                    move();
+                    turn(histories.get(i) == LEFT ? RIGHT : LEFT);
+                }
+                move();
+                turn(LEFT);
+            }
+        }
+
+        private void turn(int turnDir) {
+            dir = (dir + turnDir + 4) % 4;
+            histories.add(turnDir);
+        }
+
+        private void visit() {
+            board[pos.y][pos.x] = true;
+        }
+
+        private void move() {
+            pos.y += dy[dir]; pos.x += dx[dir];
+            visit();
         }
     }
 
-    private static void move() {
-        int ny = pos.y + dy[dir], nx = pos.x + dx[dir];
-        visit(ny, nx);
-        pos.y = ny; pos.x = nx;
-    }
+    private static Dragon[] initialize() throws IOException {
+        BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
+        int n = Integer.parseInt(reader.readLine());
+        board = new boolean[101][101];
+        Dragon[] dragons = new Dragon[n];
+        for (int i = 0; i < n; i++) {
+            StringTokenizer tokenizer = new StringTokenizer(reader.readLine());
+            int startX = Integer.parseInt(tokenizer.nextToken());
+            int startY = Integer.parseInt(tokenizer.nextToken());
+            int startDir = Integer.parseInt(tokenizer.nextToken());
+            int generation = Integer.parseInt(tokenizer.nextToken());
+            dragons[i] = new Dragon(new Pos(startY, startX), startDir, generation);
+        }
 
-    private static void visit(int y, int x) {
-        board[y][x] = true;
-    }
-
-    private static void turn(int turnDir) {
-        dir = (dir + turnDir + 4) % 4;
-        histories.add(turnDir);
+        return dragons;
     }
 
     private static int countAnswer() {
@@ -74,19 +93,6 @@ public class BOJ15685 {
         }
 
         return result;
-    }
-
-    private static void getInput() throws IOException {
-        BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
-        n = Integer.parseInt(reader.readLine());
-        curves = new int[n][4];
-        for (int i = 0; i < n; i++) {
-            StringTokenizer tokenizer = new StringTokenizer(reader.readLine());
-            for (int j = 0; j < 4; j++) {
-                curves[i][j] = Integer.parseInt(tokenizer.nextToken());
-            }
-        }
-        board = new boolean[101][101];
     }
 
     static class Pos {
