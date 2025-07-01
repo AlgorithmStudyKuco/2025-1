@@ -9,9 +9,12 @@ public class BOJ15685 {
     static int n;
     static int[][] curves;
     static boolean[][] board;
-    static final int TURN_LEFT = 1, TURN_RIGHT = -1;
+    static final int LEFT = 1, RIGHT = -1;
     static final int[] dy = new int[]{0, -1, 0, 1};
     static final int[] dx = new int[]{1, 0, -1, 0};
+    static List<Integer> histories;
+    static Pos pos;
+    static int dir;
 
     public static void main(String[] args) throws IOException {
         getInput();
@@ -24,51 +27,40 @@ public class BOJ15685 {
     }
 
     private static void simulate(int[] curve) {
-        int originX = curve[0], originY = curve[1], originDir = curve[2], originGen = curve[3];
-        List<Integer> histories = new ArrayList<>();
+        int startX = curve[0], startY = curve[1], startDir = curve[2], generations = curve[3];
+        histories = new ArrayList<>();
 
-        int x = originX, y = originY, dir = originDir;
-        board[originY][originX] = true;
-        y += dy[dir]; x += dx[dir];
-        board[y][x] = true;
-        dir = turnLeft(dir, histories);
-        if (originGen == 0) return;
+        pos = new Pos(startY, startX);
+        dir = startDir;
+        visit(startY, startX);
 
-        y += dy[dir]; x += dx[dir];
-        board[y][x] = true;
-        dir = turnLeft(dir, histories);
-        if (originGen == 1) return;
+        move();
+        turn(LEFT);
 
-        for (int gen = 2; gen <= originGen; gen++) {
+        for (int gen = 1; gen <= generations; gen++) {
             int len = histories.size();
             for (int i = len - 2; i >= 0; i--) {
-                y += dy[dir]; x += dx[dir];
-                board[y][x] = true;
-                int history = histories.get(i);
-                if (history == TURN_LEFT) {
-                    dir = turnRight(dir, histories);
-                } else {
-                    dir = turnLeft(dir, histories);
-                }
+                move();
+                turn(histories.get(i) == LEFT ? RIGHT : LEFT);
             }
-            y += dy[dir]; x += dx[dir];
-            board[y][x] = true;
-            dir = turnLeft(dir, histories);
+            move();
+            turn(LEFT);
         }
     }
 
-    private static int turnLeft(int dir, List<Integer> histories) {
-        dir += 4 + TURN_LEFT;
-        dir %= 4;
-        histories.add(TURN_LEFT);
-        return dir;
+    private static void move() {
+        int ny = pos.y + dy[dir], nx = pos.x + dx[dir];
+        visit(ny, nx);
+        pos.y = ny; pos.x = nx;
     }
 
-    private static int turnRight(int dir, List<Integer> histories) {
-        dir += 4 + TURN_RIGHT;
-        dir %= 4;
-        histories.add(TURN_RIGHT);
-        return dir;
+    private static void visit(int y, int x) {
+        board[y][x] = true;
+    }
+
+    private static void turn(int turnDir) {
+        dir = (dir + turnDir + 4) % 4;
+        histories.add(turnDir);
     }
 
     private static int countAnswer() {
@@ -95,5 +87,14 @@ public class BOJ15685 {
             }
         }
         board = new boolean[101][101];
+    }
+
+    static class Pos {
+        int x, y;
+
+        public Pos(int y, int x) {
+            this.y = y;
+            this.x = x;
+        }
     }
 }
