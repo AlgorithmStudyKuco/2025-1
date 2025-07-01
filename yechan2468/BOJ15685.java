@@ -36,10 +36,7 @@ public class BOJ15685 {
         }
 
         public void simulate() {
-            move();
-            turn(LEFT);
-
-            for (int gen = 1; gen <= generation; gen++) {
+            for (int gen = 0; gen <= generation; gen++) {
                 int len = histories.size();
                 for (int i = len - 2; i >= 0; i--) {
                     move();
