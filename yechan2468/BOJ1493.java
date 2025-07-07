@@ -12,17 +12,15 @@ public class BOJ1493 {
     public static void main(String[] args) throws IOException {
         initialize();
 
-        boolean result = solve(length, width, height);
-
-        System.out.println(result ? answer : -1);
+        System.out.println(solve(length, width, height) ? answer : -1);
     }
 
     private static boolean solve(int length, int width, int height) {
         if (length == 0 || width == 0 || height == 0) return true;
 
         for (int i = numCube - 1; i >= 0; i--) {
-            int count = cubes.get(i).count, size = cubes.get(i).size;
-            if (count == 0 || size > length || size > width || size > height) continue;
+            int size = cubes.get(i).size;
+            if (cubes.get(i).count == 0 || size > length || size > width || size > height) continue;
 
             answer++;
             cubes.get(i).count--;
@@ -56,7 +54,7 @@ public class BOJ1493 {
 
         public Cube(int power, int count) {
             for (int i = 0; i < power; i++) {
-                size *= 2;
+                size <<= 1;
             }
             this.count = count;
         }
