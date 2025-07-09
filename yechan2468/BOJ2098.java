@@ -12,14 +12,14 @@ public class BOJ2098 {
     public static void main(String[] args) throws IOException {
         initialize();
 
-        bfs();
+        solve();
 
         printAnswer();
     }
 
-    private static void bfs() {
+    private static void solve() {
         Queue<QueueElem> queue = new PriorityQueue<>(Comparator.comparingInt(x -> x.sum));
-        queue.offer(new QueueElem(START_NODE, 0, 0));
+        queue.offer(new QueueElem(START_NODE));
 
         while (!queue.isEmpty()) {
             QueueElem curr = queue.poll();
@@ -29,7 +29,7 @@ public class BOJ2098 {
                 if (weight == NO_PATH) continue;
                 if (curr.isVisited(next) || (next == START_NODE && curr.getDepth() < n - 1)) continue;
 
-                int newVisited = curr.visited | (1 << next);
+                int newVisited = curr.visited | andVisit(next);
                 int newSum = curr.sum + weight;
 
                 if (newSum < memo[next][newVisited]) {
@@ -44,7 +44,7 @@ public class BOJ2098 {
         int answer = Integer.MAX_VALUE;
         int visitedAll = 0;
         for (int i = 0; i < n; i++) {
-            visitedAll |= (1 << i);
+            visitedAll |= andVisit(i);
         }
         for (int i = 0; i < n; i++) {
             answer = Math.min(answer, memo[i][visitedAll]);
@@ -70,6 +70,10 @@ public class BOJ2098 {
         memo[0][1] = 0;
     }
 
+    private static int andVisit(int nodeNo) {
+        return 1 << nodeNo;
+    }
+
     private static class QueueElem {
         int nodeNo, visited, sum;
 
@@ -77,6 +81,10 @@ public class BOJ2098 {
             this.nodeNo = nodeNo;
             this.visited = visited;
             this.sum = sum;
+        }
+
+        public QueueElem(int nodeNo) {
+            this(nodeNo, 0, 0);
         }
 
         public boolean isVisited(int nodeNo) {
