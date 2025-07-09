@@ -7,7 +7,7 @@ public class BOJ2098 {
     static int n;
     static int[][] graph;
     static int[][] memo;
-    static final int NO_PATH = 0;
+    static final int NO_PATH = 0, START_NODE = 0;
 
     public static void main(String[] args) throws IOException {
         initialize();
@@ -18,8 +18,8 @@ public class BOJ2098 {
     }
 
     private static void bfs() {
-        Queue<QueueElem> queue = new LinkedList<>();
-        queue.offer(new QueueElem(0));
+        Queue<QueueElem> queue = new PriorityQueue<>(Comparator.comparingInt(x -> x.sum));
+        queue.offer(new QueueElem(START_NODE, 0, 0));
 
         while (!queue.isEmpty()) {
             QueueElem curr = queue.poll();
@@ -27,7 +27,7 @@ public class BOJ2098 {
             for (int next = 0; next < n; next++) {
                 int weight = graph[curr.nodeNo][next];
                 if (weight == NO_PATH) continue;
-                if (curr.isVisited(next) || (next == 0 && curr.getDepth() < n - 1)) continue;
+                if (curr.isVisited(next) || (next == START_NODE && curr.getDepth() < n - 1)) continue;
 
                 int newVisited = curr.visited | (1 << next);
                 int newSum = curr.sum + weight;
@@ -66,18 +66,12 @@ public class BOJ2098 {
         memo = new int[n][0x10000];
         for (int i = 0; i < n; i++) {
             Arrays.fill(memo[i], Integer.MAX_VALUE);
-            memo[i][1 << i] = 0;
         }
+        memo[0][1] = 0;
     }
 
     private static class QueueElem {
         int nodeNo, visited, sum;
-
-        public QueueElem(int nodeNo) {
-            this.nodeNo = nodeNo;
-            this.visited = 0;
-            this.sum = 0;
-        }
 
         public QueueElem(int nodeNo, int visited, int sum) {
             this.nodeNo = nodeNo;
