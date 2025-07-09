@@ -21,9 +21,7 @@ public class BOJ27172 {
         for (int i = 0; i < n; i++) {
             int number = numbers[i];
             int cnt = number;
-            while (true) {
-                cnt += number;
-                if (cnt > MAX_NUMBER) break;
+            while ((cnt += number) <= MAX_NUMBER) {
                 if (isNumberExist[cnt]) {
                     scores[number]++;
                     scores[cnt]--;
