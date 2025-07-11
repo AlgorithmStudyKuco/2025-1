@@ -31,6 +31,7 @@ public class BOJ2064 {
         for (int i = 0; i < n; i++) {
             addresses[i] = parse(reader.readLine());
         }
+
         return addresses;
     }
 
@@ -40,7 +41,7 @@ public class BOJ2064 {
                 .mapToInt(Integer::parseInt)
                 .toArray();
         for (int i = 0; i < 4; i++) {
-            result += octets[3 - i] << (i * BYTE);
+            result |= octets[i] << ((3 - i) * BYTE);
         }
 
         return result;
@@ -52,6 +53,7 @@ public class BOJ2064 {
         for (int i = 0; i < 4; i++) {
             result.append((address >> ((3 - i) * BYTE)) & mask).append(i != 3 ? "." : "");
         }
+
         return result.toString();
     }
 }
