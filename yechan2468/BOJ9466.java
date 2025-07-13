@@ -9,6 +9,7 @@ public class BOJ9466 {
     static boolean[] visited;
     static int answer;
     static boolean isCycleFound;
+    static int visitCount;
 
     public static void main(String[] args) throws IOException {
         BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
@@ -25,31 +26,29 @@ public class BOJ9466 {
         for (int i = 0; i < n; i++) {
             if (visited[i]) continue;
 
-            Stack<Integer> path = new Stack<>();
+            Stack<Integer> cycle = new Stack<>();
             isCycleFound = false;
-            int newVisitedCount = dfs(i, i, path);
+            visitCount = 0;
+            dfs(i, i, cycle);
 
-            answer = answer + newVisitedCount - path.size();
+            answer = answer + visitCount - cycle.size();
         }
 
         System.out.println(answer);
     }
 
-    private static int dfs(int curr, int start, Stack<Integer> history) {
+    private static void dfs(int curr, int start, Stack<Integer> cycle) {
         visited[curr] = true;
-        int visitCount = 0;
         visitCount++;
 
-        if (!isCycleFound) history.add(curr);
+        if (!isCycleFound) cycle.add(curr);
         for (int next : graph.get(curr)) {
             if (next == start) isCycleFound = true;
             if (visited[next]) continue;
             visited[next] = true;
-            visitCount += dfs(next, start, history);
+            dfs(next, start, cycle);
         }
-        if (!isCycleFound) history.pop();
-
-        return visitCount;
+        if (!isCycleFound) cycle.pop();
     }
 
     private static void initialize(BufferedReader reader) throws IOException {
