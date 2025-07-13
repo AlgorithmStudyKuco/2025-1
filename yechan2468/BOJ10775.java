@@ -1,30 +1,43 @@
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.util.Arrays;
+import java.util.TreeSet;
 
 public class BOJ10775 {
+    static int numGate, numPlane, answer;
+    static int[] availableGates;
+    static TreeSet<Integer> bst;
+
     public static void main(String[] args) throws IOException {
-        BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
-        int numGate = Integer.parseInt(reader.readLine());
-        int numPlane = Integer.parseInt(reader.readLine());
-        int[] availableGates = new int[numPlane + 1];
-        for (int i = 1; i <= numPlane; i++) {
-            availableGates[i] = Integer.parseInt(reader.readLine());
-        }
-        int answer = 0;
+        initialize();
 
-        Arrays.sort(availableGates);
-
-        int maxAvailableGate = numGate;
-        for (int i = numPlane; i > 0; i--) {
-            if (maxAvailableGate == 0) break;
-            if (availableGates[i] <= maxAvailableGate) {
-                answer++;
-                maxAvailableGate = availableGates[i] - 1;
-            }
-        }
+        solve();
 
         System.out.println(answer);
+    }
+
+    public static void solve() {
+        for (int i = 0; i < numPlane; i++) {
+            if (bst.isEmpty()) return;
+            Integer searchResult = bst.floor(availableGates[i]);
+            if (searchResult == null) return;
+            bst.remove(searchResult);
+            answer++;
+        }
+    }
+
+    private static void initialize() throws IOException {
+        BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
+        numGate = Integer.parseInt(reader.readLine());
+        numPlane = Integer.parseInt(reader.readLine());
+        availableGates = new int[numPlane];
+        for (int i = 0; i < numPlane; i++) {
+            availableGates[i] = Integer.parseInt(reader.readLine()) - 1;
+        }
+        bst = new TreeSet<>();
+        for (int i = 0; i < numGate; i++) {
+            bst.add(i);
+        }
+        answer = 0;
     }
 }
