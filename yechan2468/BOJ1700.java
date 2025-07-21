@@ -19,7 +19,7 @@ public class BOJ1700 {
             if (currSet.contains(order[i])) continue;
             
             if (currSet.size() == numOutlet) {
-                int[] currCount = counts[i];
+                final int[] currCount = counts[i];
                 PriorityQueue<Integer> queue = new PriorityQueue<>((a, b) -> Integer.compare(currCount[b], currCount[a]));
                 queue.addAll(currSet);
                 currSet.remove(queue.poll());
@@ -37,8 +37,7 @@ public class BOJ1700 {
         for (int i = 0; i < numUsage; i++) {
             Arrays.fill(counts[i], INF);
         }
-        for (int i = numUsage - 1; i >= 0; i--) {
-            if (i == numUsage - 1) continue;
+        for (int i = numUsage - 2; i >= 0; i--) {
             for (int j = 0; j < numUsage; j++) {
                 counts[i][j] = counts[i+1][j] + 1;
             }
