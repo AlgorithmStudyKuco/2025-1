@@ -21,7 +21,6 @@ public class BOJ1717 {
                 System.out.println(find(a) == find(b) ? "YES" : "NO");
             }
         }
-
     }
 
     private static void union(int a, int b) {
