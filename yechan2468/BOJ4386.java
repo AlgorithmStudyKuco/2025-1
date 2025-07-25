@@ -7,28 +7,35 @@ import java.util.StringTokenizer;
 
 public class BOJ4386 {
     public static void main(String[] args) throws IOException {
-        Input input = readInputs();
-        int n = input.n; ArrayList<Edge> edges = input.edges;
-        DisjointSet disjointSet = new DisjointSet(n);
+        final Input input = readInputs();
+        final int n = input.n;
+        final ArrayList<Edge> edges = input.edges;
+        final DisjointSet disjointSet = new DisjointSet(n);
 
+        final double answer = kruskal(edges, disjointSet);
+
+        System.out.printf("%.2f\n", answer);
+    }
+
+    private static double kruskal(ArrayList<Edge> edges, DisjointSet disjointSet) {
         edges.sort(Comparator.comparingDouble(e -> e.distance));
 
         double answer = 0;
         for (Edge edge : edges) {
-            int a = edge.a, b = edge.b;
+            final int a = edge.a, b = edge.b;
             if (disjointSet.find(a) == disjointSet.find(b)) continue;
             disjointSet.union(a, b);
             answer += edge.distance;
         }
 
-        System.out.printf("%.2f\n", answer);
+        return answer;
     }
 
     private static Input readInputs() throws IOException {
         BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
-        int n = Integer.parseInt(reader.readLine());
-        double[] x = new double[n];
-        double[] y = new double[n];
+        final int n = Integer.parseInt(reader.readLine());
+        final double[] x = new double[n];
+        final double[] y = new double[n];
         for (int i = 0; i < n; i++) {
             StringTokenizer tokenizer = new StringTokenizer(reader.readLine());
             x[i] = Double.parseDouble(tokenizer.nextToken());
@@ -42,12 +49,13 @@ public class BOJ4386 {
                 edges.add(new Edge(i, j, distance));
             }
         }
+
         return new Input(n, edges);
     }
 
     private static class Input {
-        int n;
-        ArrayList<Edge> edges;
+        final int n;
+        final ArrayList<Edge> edges;
 
         public Input(int n, ArrayList<Edge> edges) {
             this.n = n;
@@ -56,7 +64,7 @@ public class BOJ4386 {
     }
 
     private static class DisjointSet {
-        int[] parents;
+        private final int[] parents;
 
         public DisjointSet(int n) {
             parents = new int[n];
@@ -78,8 +86,8 @@ public class BOJ4386 {
     }
 
     private static class Edge {
-        int a, b;
-        double distance;
+        final int a, b;
+        final double distance;
 
         public Edge(int a, int b, double distance) {
             this.a = a;
