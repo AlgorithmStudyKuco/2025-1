@@ -8,11 +8,9 @@ import java.util.StringTokenizer;
 public class BOJ4386 {
     public static void main(String[] args) throws IOException {
         Input input = readInputs();
-        int n = input.n;
-        ArrayList<Edge> edges = input.edges;
-        DisjointSet disjointSet = new DisjointSet(n);
+        DisjointSet disjointSet = new DisjointSet(input.n);
 
-        double answer = kruskal(edges, disjointSet);
+        double answer = kruskal(input.edges, disjointSet);
 
         System.out.printf("%.2f\n", answer);
     }
@@ -34,8 +32,7 @@ public class BOJ4386 {
     private static Input readInputs() throws IOException {
         BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
         int n = Integer.parseInt(reader.readLine());
-        double[] x = new double[n];
-        double[] y = new double[n];
+        double[] x = new double[n], y = new double[n];
         for (int i = 0; i < n; i++) {
             StringTokenizer tokenizer = new StringTokenizer(reader.readLine());
             x[i] = Double.parseDouble(tokenizer.nextToken());
@@ -45,7 +42,7 @@ public class BOJ4386 {
         ArrayList<Edge> edges = new ArrayList<>();
         for (int i = 0; i < n; i++) {
             for (int j = 0; j < n; j++) {
-                double distance = Math.sqrt(Math.pow(x[i] - x[j], 2) + Math.pow(y[i] - y[j], 2));
+                double distance = getDistance(x[i], y[i], x[j], y[j]);
                 edges.add(new Edge(i, j, distance));
             }
         }
@@ -61,6 +58,10 @@ public class BOJ4386 {
             this.n = n;
             this.edges = edges;
         }
+    }
+
+    static double getDistance(double x1, double y1, double x2, double y2) {
+        return Math.sqrt(Math.pow(x2 - x1, 2) + Math.pow(y2 - y1, 2));
     }
 
     private static class DisjointSet {
