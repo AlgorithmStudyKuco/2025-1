@@ -7,12 +7,12 @@ import java.util.StringTokenizer;
 
 public class BOJ4386 {
     public static void main(String[] args) throws IOException {
-        final Input input = readInputs();
-        final int n = input.n;
-        final ArrayList<Edge> edges = input.edges;
-        final DisjointSet disjointSet = new DisjointSet(n);
+        Input input = readInputs();
+        int n = input.n;
+        ArrayList<Edge> edges = input.edges;
+        DisjointSet disjointSet = new DisjointSet(n);
 
-        final double answer = kruskal(edges, disjointSet);
+        double answer = kruskal(edges, disjointSet);
 
         System.out.printf("%.2f\n", answer);
     }
@@ -22,7 +22,7 @@ public class BOJ4386 {
 
         double answer = 0;
         for (Edge edge : edges) {
-            final int a = edge.a, b = edge.b;
+            int a = edge.a, b = edge.b;
             if (disjointSet.find(a) == disjointSet.find(b)) continue;
             disjointSet.union(a, b);
             answer += edge.distance;
@@ -33,9 +33,9 @@ public class BOJ4386 {
 
     private static Input readInputs() throws IOException {
         BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
-        final int n = Integer.parseInt(reader.readLine());
-        final double[] x = new double[n];
-        final double[] y = new double[n];
+        int n = Integer.parseInt(reader.readLine());
+        double[] x = new double[n];
+        double[] y = new double[n];
         for (int i = 0; i < n; i++) {
             StringTokenizer tokenizer = new StringTokenizer(reader.readLine());
             x[i] = Double.parseDouble(tokenizer.nextToken());
