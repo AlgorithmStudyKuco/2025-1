@@ -2,74 +2,61 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.StringTokenizer;
+import java.util.function.IntBinaryOperator;
 
 public class BOJ2357 {
-    static int n, k, numQuery;
+    static int numQuery;
     static int[] numbers;
     static int[][] queries;
-    static int[][] minSparseTable, maxSparseTable;
+    static SparseTable minTable, maxTable;
 
     public static void main(String[] args) throws IOException {
         getInput();
 
-        initializeSparseTable();
+        minTable = new SparseTable(numbers, Math::min);
+        maxTable = new SparseTable(numbers, Math::max);
 
         for (int i = 0; i < numQuery; i++) {
-            System.out.println(query(queries[i][0], queries[i][1]));
+            int a = queries[i][0], b = queries[i][1];
+            System.out.println(minTable.query(a, b) + " " + maxTable.query(a, b));
         }
     }
 
-    private static void initializeSparseTable() {
-        minSparseTable = new int[k][1 << k];
-        maxSparseTable = new int[k][1 << k];
+    static class SparseTable {
+        private final int[][] table;
+        private final IntBinaryOperator f;
 
-        for (int i = 0; i < 1 << k; i++) {
-            minSparseTable[0][i] = maxSparseTable[0][i] = numbers[i];
-        }
-        for (int i = 1; i < k; i++) {
-            for (int l = 0; l < (1 << k) - (1 << i - 1); l++) {
+        public SparseTable(int[] arr, IntBinaryOperator f) {
+            this.f = f;
+            int n = arr.length;
+            int k = log2(n) + 1;
+            table = new int[k][];
+            table[0] = new int[n];
+            System.arraycopy(arr, 0, table[0], 0, n);
+
+            for (int i = 1; i < k; i++) {
                 int len = 1 << i;
-                int mid = l + len / 2;
-                minSparseTable[log2(len)][l] = Math.min(
-                        minSparseTable[log2(len) - 1][l] == 0 ? Integer.MAX_VALUE : minSparseTable[log2(len) - 1][l],
-                        minSparseTable[log2(len) - 1][mid] == 0 ? Integer.MAX_VALUE : minSparseTable[log2(len) - 1][mid]
-                );
-                maxSparseTable[log2(len)][l] = Math.max(
-                        maxSparseTable[log2(len) - 1][l],
-                        maxSparseTable[log2(len) - 1][mid]
-                );
+                table[i] = new int[n - len + 1];
+                for (int left = 0; left <= n - len; left++) {
+                    int mid = left + len / 2;
+                    table[i][left] = f.applyAsInt(table[i - 1][left], table[i - 1][mid]);
+                }
             }
         }
-    }
 
-    private static Answer query(int a, int b) {
-        int p = Integer.highestOneBit(b - a + 1);
-        int min = Math.min(minSparseTable[log2(p)][a], minSparseTable[log2(p)][b - p + 1]);
-        int max = Math.max(maxSparseTable[log2(p)][a], maxSparseTable[log2(p)][b - p + 1]);
-        return new Answer(min, max);
-    }
+        public int query(int a, int b) {
+            int p = Integer.highestOneBit(b - a + 1);
 
-    private static class Answer {
-        int min, max;
-
-        public Answer(int min, int max) {
-            this.min = min;
-            this.max = max;
-        }
-
-        @Override
-        public String toString() {
-            return min + " " + max;
+            return f.applyAsInt(table[log2(p)][a], table[log2(p)][b - p + 1]);
         }
     }
 
     private static void getInput() throws IOException {
         BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
         StringTokenizer tokenizer = new StringTokenizer(reader.readLine());
-        n = Integer.parseInt(tokenizer.nextToken());
+        int n = Integer.parseInt(tokenizer.nextToken());
         numQuery = Integer.parseInt(tokenizer.nextToken());
-        k = log2(100_000) + 1;
-        numbers = new int[1 << k];
+        numbers = new int[n];
         for (int i = 0; i < n; i++) {
             numbers[i] = Integer.parseInt(reader.readLine());
         }
@@ -86,7 +73,6 @@ public class BOJ2357 {
         while ((x >>= 1) != 0) {
             result++;
         }
-
         return result;
     }
 }
