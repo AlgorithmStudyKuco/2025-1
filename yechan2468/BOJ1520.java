@@ -7,7 +7,6 @@ public class BOJ1520 {
     private static int numRow, numColumn;
     private static int[][] heights, indegrees, memo;
     private static List<List<List<Point>>> graph;
-    private static final int[] dy = {-1, 0, 0, 1}, dx = {0, -1, 1, 0};
 
     public static void main(String[] args) throws IOException {
         initialize();
@@ -25,8 +24,9 @@ public class BOJ1520 {
             Point curr = queue.poll();
 
             for (Point next : graph.get(curr.row).get(curr.col)) {
-                indegrees[next.row][next.col]--;
                 memo[next.row][next.col] += memo[curr.row][curr.col];
+
+                indegrees[next.row][next.col]--;
                 if (indegrees[next.row][next.col] == 0) {
                     queue.offer(next);
                 }
@@ -43,33 +43,15 @@ public class BOJ1520 {
                 }
             }
         }
+
         return queue;
     }
 
     private static void initialize() throws IOException {
         readInput();
-
-        graph = new ArrayList<>();
-        for (int row = 0; row < numRow; row++) {
-            graph.add(new ArrayList<>());
-            for (int col = 0; col < numColumn; col++) {
-                graph.get(row).add(new ArrayList<>());
-            }
-        }
-        indegrees = new int[numRow][numColumn];
-        for (int row = 0; row < numRow; row++) {
-            for (int col = 0; col < numColumn; col++) {
-                for (int dir = 0; dir < 4; dir++) {
-                    int nRow = row + dy[dir], nCol = col + dx[dir];
-                    if (nRow < 0 || nRow >= numRow || nCol < 0 || nCol >= numColumn) continue;
-                    if (heights[nRow][nCol] >= heights[row][col]) continue;
-                    graph.get(row).get(col).add(new Point(nRow, nCol));
-                    indegrees[nRow][nCol]++;
-                }
-            }
-        }
-        memo = new int[numRow][numColumn];
-        memo[0][0] = 1;
+        graph = initGraph();
+        indegrees = initIndegrees();
+        memo = initMemo();
     }
 
     private static void readInput() throws IOException {
@@ -84,6 +66,44 @@ public class BOJ1520 {
                 heights[row][col] = Integer.parseInt(tokenizer.nextToken());
             }
         }
+    }
+
+    private static List<List<List<Point>>> initGraph() {
+        List<List<List<Point>>> graph = new ArrayList<>();
+        for (int row = 0; row < numRow; row++) {
+            graph.add(new ArrayList<>());
+            for (int col = 0; col < numColumn; col++) {
+                graph.get(row).add(new ArrayList<>());
+            }
+        }
+
+        return graph;
+    }
+
+    private static int[][] initIndegrees() {
+        int[] dy = {-1, 0, 0, 1}, dx = {0, -1, 1, 0};
+
+        int[][] indegrees = new int[numRow][numColumn];
+        for (int row = 0; row < numRow; row++) {
+            for (int col = 0; col < numColumn; col++) {
+                for (int dir = 0; dir < 4; dir++) {
+                    int nRow = row + dy[dir], nCol = col + dx[dir];
+                    if (nRow < 0 || nRow >= numRow || nCol < 0 || nCol >= numColumn) continue;
+                    if (heights[nRow][nCol] >= heights[row][col]) continue;
+                    graph.get(row).get(col).add(new Point(nRow, nCol));
+                    indegrees[nRow][nCol]++;
+                }
+            }
+        }
+
+        return indegrees;
+    }
+
+    private static int[][] initMemo() {
+        int[][] memo = new int[numRow][numColumn];
+        memo[0][0] = 1;
+
+        return memo;
     }
 
     private static class Point {
