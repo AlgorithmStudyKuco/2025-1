@@ -4,33 +4,32 @@ import java.io.InputStreamReader;
 import java.util.*;
 
 public class BOJ13334 {
-    static int numLines, length;
-    static int[][] lineInput;
+    static int n, metroLength;
+    static int[][] transitInputs;
 
     public static void main(String[] args) throws IOException {
         getInput();
 
-        Map<Integer, List<Boolean>> lines = new HashMap<>();
-        for (int i = 0; i < numLines; i++) {
-            int lineStart = lineInput[i][0];
-            int lineEnd = lineInput[i][1];
+        Map<Integer, List<Boolean>> transits = new HashMap<>();
+        for (int i = 0; i < n; i++) {
+            int start = transitInputs[i][0];
+            int end = transitInputs[i][1];
 
-            if (lineEnd - lineStart > length) continue;
+            if (end - start > metroLength) continue;
 
-            lines.putIfAbsent(lineEnd - length, new ArrayList<>());
-            lines.get(lineEnd - length).add(Boolean.TRUE);
-            lines.putIfAbsent(lineStart + 1, new ArrayList<>());
-            lines.get(lineStart + 1).add(Boolean.FALSE);
+            transits.putIfAbsent(end - metroLength, new ArrayList<>());
+            transits.get(end - metroLength).add(Boolean.TRUE);
+            transits.putIfAbsent(start + 1, new ArrayList<>());
+            transits.get(start + 1).add(Boolean.FALSE);
         }
 
-        Set<Integer> keySet = lines.keySet();
-        List<Integer> keyList = new ArrayList<>(keySet);
-        Collections.sort(keyList);
+        List<Integer> keys = new ArrayList<>(transits.keySet());
+        Collections.sort(keys);
 
         int count = 0;
         int answer = 0;
-        for (int index : keyList) {
-            for (boolean b : lines.get(index)) {
+        for (int index : keys) {
+            for (boolean b : transits.get(index)) {
                 count += (b ? 1 : -1);
             }
             answer = Math.max(answer, count);
@@ -42,17 +41,17 @@ public class BOJ13334 {
     private static void getInput() throws IOException {
         BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
 
-        numLines = Integer.parseInt(reader.readLine());
+        n = Integer.parseInt(reader.readLine());
 
-        lineInput = new int[numLines][2];
-        for (int i = 0; i < numLines; i++) {
+        transitInputs = new int[n][2];
+        for (int i = 0; i < n; i++) {
             StringTokenizer tokenizer = new StringTokenizer(reader.readLine());
             int a = Integer.parseInt(tokenizer.nextToken());
             int b = Integer.parseInt(tokenizer.nextToken());
-            lineInput[i][0] = Math.min(a, b);
-            lineInput[i][1] = Math.max(a, b);
+            transitInputs[i][0] = Math.min(a, b);
+            transitInputs[i][1] = Math.max(a, b);
         }
 
-        length = Integer.parseInt(reader.readLine());
+        metroLength = Integer.parseInt(reader.readLine());
     }
 }
