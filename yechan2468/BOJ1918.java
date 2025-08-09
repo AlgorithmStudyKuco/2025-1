@@ -16,11 +16,9 @@ public class BOJ1918 {
         LinkedList<Token> tokens = tokenizeCurrentLevel(infix);
 
         if (tokens.size() == 1) return tokens.getFirst();
-
         operationToPostfix(tokens, "^[*|/]$");
 
         if (tokens.size() == 1) return tokens.getFirst();
-
         operationToPostfix(tokens, "^[+|-]$");
 
         StringBuilder builder = new StringBuilder();
@@ -37,9 +35,9 @@ public class BOJ1918 {
         for (int i = 0; i < infix.length(); i++) {
             char curr = infix.charAt(i);
             if (curr == '(') {
-                int lastIndex = findPairParenthesis(infix, i);
-                tokens.add(toPostfix(infix.substring(i + 1, lastIndex)));
-                i = lastIndex;
+                int index = findPairParenthesis(infix, i);
+                tokens.add(toPostfix(infix.substring(i + 1, index)));
+                i = index;
             } else {
                 tokens.add(toPostfix(String.valueOf(curr)));
             }
@@ -49,17 +47,17 @@ public class BOJ1918 {
     }
 
     private static int findPairParenthesis(String infix, int i) {
-        int lastIndex = i;
+        int result = i;
         int stack = 1;
         while (stack > 0) {
-            lastIndex++;
-            if (infix.charAt(lastIndex) == '(') {
+            result++;
+            if (infix.charAt(result) == '(') {
                 stack++;
-            } else if (infix.charAt(lastIndex) == ')') {
+            } else if (infix.charAt(result) == ')') {
                 stack--;
             }
         }
-        return lastIndex;
+        return result;
     }
 
     private static void operationToPostfix(LinkedList<Token> tokens, String regex) {
