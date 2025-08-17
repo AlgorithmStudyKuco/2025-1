@@ -156,20 +156,19 @@ public class BOJ2408 {
             BigInteger result = BigInteger.valueOf(0);
 
             for (int i = x.value.length() - 1; i >= 0; i--) {
-                String localResult = getLocalMultiplication(x, i);
+                BigInteger localResult = getLocalMultiplication(x, i);
 
-                result = result.add(new BigInteger(localResult));
+                result = result.add(localResult);
             }
 
             return new BigInteger(result.value, calculateSign(this, x));
         }
 
-        private String getLocalMultiplication(BigInteger x, int i) {
+        private BigInteger getLocalMultiplication(BigInteger x, int i) {
             int carry = 0;
             int[] curr = new int[value.length() + 1];
             for (int j = value.length() - 1; j >= 0; j--) {
-                int digit = (value.charAt(j) - '0') * (x.value.charAt(i) - '0');
-                digit += carry;
+                int digit = (value.charAt(j) - '0') * (x.value.charAt(i) - '0') + carry;
                 carry = digit / 10;
                 curr[j + 1] = digit % 10;
             }
@@ -180,18 +179,14 @@ public class BOJ2408 {
             }
             if (carry > 0) currStr.setCharAt(0, String.valueOf(carry).charAt(0));
 
-            removeLeadingZeros(currStr);
-
             int powerOfTen = x.value.length() - 1 - i;
             currStr.append("0".repeat(Math.max(0, powerOfTen)));
 
-            return currStr.toString();
+            return new BigInteger(currStr.toString());
         }
 
         public BigInteger divide(BigInteger x) {
-            if (value.equals("0")) {
-                return BigInteger.valueOf(0);
-            }
+            if (value.equals("0")) return BigInteger.valueOf(0);
 
             if (abs(this).isLessThan(abs(x))) {
                 if (this.sign == MINUS && x.sign == PLUS || this.sign == PLUS && x.sign == MINUS) {
@@ -200,11 +195,11 @@ public class BOJ2408 {
                 return BigInteger.valueOf(0);
             }
 
-            StringBuilder value = new StringBuilder();
+            StringBuilder quotient = new StringBuilder();
             int digitsDiff = this.value.length() - x.value.length();
             if (digitsDiff < 0) return BigInteger.valueOf(0);
-            BigInteger remainder = abs(new BigInteger(this));
 
+            BigInteger remainder = abs(new BigInteger(this));
             while (digitsDiff >= 0) {
                 BigInteger base = new BigInteger(x.value + "0".repeat(digitsDiff));
 
@@ -213,18 +208,19 @@ public class BOJ2408 {
                     remainder = remainder.subtract(base);
                     count++;
                 }
-                value.append(count);
+                quotient.append(count);
+
                 digitsDiff--;
             }
 
-            removeLeadingZeros(value);
-
             int sign = calculateSign(this, x);
+
             if (sign == MINUS && !remainder.equals(BigInteger.valueOf(0))) {
-                return new BigInteger(new BigInteger(value.toString()).add(BigInteger.valueOf(1)).value, sign);
+                BigInteger oneAdded = new BigInteger(quotient.toString()).add(BigInteger.valueOf(1));
+                return new BigInteger(oneAdded.value, sign);
             }
 
-            return new BigInteger(value.toString(), sign);
+            return new BigInteger(quotient.toString(), sign);
         }
 
         private int getDigitFromRight(String number, int position) {
@@ -271,12 +267,6 @@ public class BOJ2408 {
                 str = str.substring(1);
             }
             return str;
-        }
-
-        private void removeLeadingZeros(StringBuilder builder) {
-            while (builder.length() > 1 && builder.charAt(0) == '0') {
-                builder.deleteCharAt(0);
-            }
         }
 
         private static BigInteger negate(BigInteger x) {
