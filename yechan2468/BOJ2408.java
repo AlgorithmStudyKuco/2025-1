@@ -6,15 +6,9 @@ import java.util.List;
 
 public class BOJ2408 {
     public static void main(String[] args) throws IOException {
-        BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
-        int n = 2 * Integer.parseInt(reader.readLine()) - 1;
-        if (n == -1) return;
+        List<String> expression = readInput();
 
-        List<String> expression = new LinkedList<>();
-        for (int i = 0; i < n; i++) {
-            expression.add(reader.readLine());
-        }
-
+        if (expression == null) return;
         if (expression.size() == 1) {
             System.out.println(expression.get(0));
             return;
@@ -25,6 +19,18 @@ public class BOJ2408 {
         processOperators(expression, "+", "-");
 
         System.out.println(expression.get(0));
+    }
+
+    private static List<String> readInput() throws IOException {
+        BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
+        int n = 2 * Integer.parseInt(reader.readLine()) - 1;
+        if (n == -1) return null;
+
+        List<String> expression = new LinkedList<>();
+        for (int i = 0; i < n; i++) {
+            expression.add(reader.readLine());
+        }
+        return expression;
     }
 
     private static void processOperators(List<String> expression, String... operators) {
