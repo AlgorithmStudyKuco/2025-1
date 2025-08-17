@@ -9,6 +9,7 @@ public class BOJ2408 {
         BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
         int n = 2 * Integer.parseInt(reader.readLine()) - 1;
         if (n == -1) return;
+
         List<String> expression = new LinkedList<>();
         for (int i = 0; i < n; i++) {
             expression.add(reader.readLine());
@@ -19,43 +20,46 @@ public class BOJ2408 {
             return;
         }
 
-        for (int i = 0; i < expression.size(); i++) {
-            String curr = expression.get(i);
-            if (!curr.matches("^[*|/]$")) continue;
+        processOperators(expression, "*", "/");
 
-            BigInteger operand1 = new BigInteger(expression.get(i - 1));
-            BigInteger operand2 = new BigInteger(expression.get(i + 1));
-
-            if (curr.equals("*")) {
-                expression.set(i - 1, operand1.multiply(operand2).toString());
-            } else if (curr.equals("/")) {
-                expression.set(i - 1, operand1.divide(operand2).toString());
-            }
-
-            expression.remove(i + 1);
-            expression.remove(i);
-            i -= 2;
-        }
-
-        for (int i = 0; i < expression.size(); i++) {
-            String curr = expression.get(i);
-            if (!curr.matches("^[+|-]$")) continue;
-
-            BigInteger operand1 = new BigInteger(expression.get(i - 1));
-            BigInteger operand2 = new BigInteger(expression.get(i + 1));
-
-            if (curr.equals("+")) {
-                expression.set(i - 1, operand1.add(operand2).toString());
-            } else if (curr.equals("-")) {
-                expression.set(i - 1, operand1.subtract(operand2).toString());
-            }
-
-            expression.remove(i + 1);
-            expression.remove(i);
-            i -= 2;
-        }
+        processOperators(expression, "+", "-");
 
         System.out.println(expression.get(0));
+    }
+
+    private static void processOperators(List<String> expression, String... operators) {
+        for (int i = 0; i < expression.size(); i++) {
+            String curr = expression.get(i);
+            if (!isTargetOperator(curr, operators)) continue;
+
+            BigInteger operand1 = new BigInteger(expression.get(i - 1));
+            BigInteger operand2 = new BigInteger(expression.get(i + 1));
+
+            String result = calculateOperation(operand1, operand2, curr);
+
+            expression.set(i - 1, result);
+            expression.remove(i + 1);
+            expression.remove(i);
+
+            i -= 2;
+        }
+    }
+
+    private static boolean isTargetOperator(String token, String... targetOperators) {
+        for (String operator : targetOperators) {
+            if (token.equals(operator)) return true;
+        }
+        return false;
+    }
+
+    private static String calculateOperation(BigInteger operand1, BigInteger operand2, String operator) {
+        switch (operator) {
+            case "*": return operand1.multiply(operand2).toString();
+            case "/": return operand1.divide(operand2).toString();
+            case "+": return operand1.add(operand2).toString();
+            case "-": return operand1.subtract(operand2).toString();
+            default: return "";
+        }
     }
 
     private static class BigInteger {
@@ -93,6 +97,22 @@ public class BOJ2408 {
                 return abs(x).subtract(abs(this));
             }
 
+            return addImpl(x);
+        }
+
+        public BigInteger subtract(BigInteger x) {
+            if (sign == MINUS && x.sign == MINUS) {
+                return abs(x).subtract(abs(this));
+            } else if (sign == PLUS && x.sign == MINUS) {
+                return abs(this).add(abs(x));
+            } else if (sign == MINUS && x.sign == PLUS) {
+                return negate(abs(x).add(abs(this)));
+            }
+
+            return subtractImpl(x);
+        }
+
+        private BigInteger addImpl(BigInteger x) {
             StringBuilder value = new StringBuilder();
             int i;
             boolean carry = false;
@@ -124,15 +144,7 @@ public class BOJ2408 {
             return new BigInteger(value.reverse().toString());
         }
 
-        public BigInteger subtract(BigInteger x) {
-            if (sign == MINUS && x.sign == MINUS) {
-                return abs(x).subtract(abs(this));
-            } else if (sign == PLUS && x.sign == MINUS) {
-                return abs(this).add(abs(x));
-            } else if (sign == MINUS && x.sign == PLUS) {
-                return negate(abs(x).add(abs(this)));
-            }
-
+        private BigInteger subtractImpl(BigInteger x) {
             if (abs(x).isGreaterThan(abs(this))) {
                 return negate(abs(x).subtract(abs(this)));
             }
