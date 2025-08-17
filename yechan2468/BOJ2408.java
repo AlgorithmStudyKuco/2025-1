@@ -139,10 +139,6 @@ public class BOJ2408 {
                 result.append(borrowing ? diff + 10 : diff);
             }
 
-            while (result.length() > 1 && result.charAt(result.length() - 1) == '0') {
-                result.deleteCharAt(result.length() - 1);
-            }
-
             return new BigInteger(result.reverse().toString());
         }
 
@@ -150,28 +146,36 @@ public class BOJ2408 {
             BigInteger result = BigInteger.valueOf(0);
 
             for (int i = x.value.length() - 1; i >= 0; i--) {
-                int carry = 0;
-                int[] curr = new int[value.length() + 1];
-                for (int j = value.length() - 1; j >= 0; j--) {
-                    int digit = (value.charAt(j) - '0') * (x.value.charAt(i) - '0');
-                    digit += carry;
-                    carry = digit / 10;
-                    curr[j + 1] = digit % 10;
-                }
-                StringBuilder currStr = new StringBuilder();
-                for (int currChar : curr) {
-                    currStr.append(currChar);
-                }
-                if (carry > 0) currStr.setCharAt(0, String.valueOf(carry).charAt(0));
-                while (currStr.length() > 1 && currStr.charAt(0) == '0') {
-                    currStr.deleteCharAt(0);
-                }
-                currStr.append("0".repeat(Math.max(0, x.value.length() - 1 - i)));
+                String localResult = getLocalMultiplication(x, i);
 
-                result = result.add(new BigInteger(currStr.toString()));
+                result = result.add(new BigInteger(localResult));
             }
 
             return new BigInteger(result.value, calculateSign(this, x));
+        }
+
+        private String getLocalMultiplication(BigInteger x, int i) {
+            int carry = 0;
+            int[] curr = new int[value.length() + 1];
+            for (int j = value.length() - 1; j >= 0; j--) {
+                int digit = (value.charAt(j) - '0') * (x.value.charAt(i) - '0');
+                digit += carry;
+                carry = digit / 10;
+                curr[j + 1] = digit % 10;
+            }
+
+            StringBuilder currStr = new StringBuilder();
+            for (int currChar : curr) {
+                currStr.append(currChar);
+            }
+            if (carry > 0) currStr.setCharAt(0, String.valueOf(carry).charAt(0));
+
+            removeLeadingZeros(currStr);
+
+            int powerOfTen = x.value.length() - 1 - i;
+            currStr.append("0".repeat(Math.max(0, powerOfTen)));
+
+            return currStr.toString();
         }
 
         public BigInteger divide(BigInteger x) {
@@ -203,9 +207,7 @@ public class BOJ2408 {
                 digitsDiff--;
             }
 
-            while (value.length() > 1 && value.charAt(0) == '0') {
-                value.deleteCharAt(0);
-            }
+            removeLeadingZeros(value);
 
             int sign = calculateSign(this, x);
             if (sign == MINUS && !remainder.equals(BigInteger.valueOf(0))) {
@@ -259,6 +261,12 @@ public class BOJ2408 {
                 str = str.substring(1);
             }
             return str;
+        }
+
+        private void removeLeadingZeros(StringBuilder builder) {
+            while (builder.length() > 1 && builder.charAt(0) == '0') {
+                builder.deleteCharAt(0);
+            }
         }
 
         private static BigInteger negate(BigInteger x) {
