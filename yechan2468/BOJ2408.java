@@ -18,7 +18,7 @@ public class BOJ2408 {
 
         processOperators(expression, "+", "-");
 
-        System.out.println(expression.get(0));
+        printAnswer(expression);
     }
 
     private static List<String> readInput() throws IOException {
@@ -31,6 +31,10 @@ public class BOJ2408 {
             expression.add(reader.readLine());
         }
         return expression;
+    }
+
+    private static void printAnswer(List<String> expression) {
+        System.out.println(expression.get(0));
     }
 
     private static void processOperators(List<String> expression, String... operators) {
