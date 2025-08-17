@@ -113,35 +113,17 @@ public class BOJ2408 {
         }
 
         private BigInteger addImpl(BigInteger x) {
-            StringBuilder value = new StringBuilder();
-            int i;
+            StringBuilder result = new StringBuilder();
             boolean carry = false;
-            for (i = 0; i < Math.min(this.value.length(), x.value.length()); i++) {
-                int digit = (this.value.charAt(this.value.length() - 1 - i) - '0')
-                        + (x.value.charAt(x.value.length() - 1 - i) - '0');
-                digit += (carry ? 1 : 0);
-                carry = digit >= 10;
-                value.append(digit % 10);
+            for (int i = 0; i < Math.max(value.length(), x.value.length()); i++) {
+                int sum = getDigitFromRight(value, i) + getDigitFromRight(x.value, i) + (carry ? 1 : 0);
+                carry = sum >= 10;
+                result.append(sum % 10);
             }
 
-            while (i < this.value.length()) {
-                int digit = this.value.charAt(this.value.length() - 1 - i) - '0';
-                digit += (carry ? 1 : 0);
-                carry = digit >= 10;
-                value.append(digit % 10);
-                i++;
-            }
-            while (i < x.value.length()) {
-                int digit = x.value.charAt(x.value.length() - 1 - i) - '0';
-                digit += (carry ? 1 : 0);
-                carry = digit >= 10;
-                value.append(digit % 10);
-                i++;
-            }
+            if (carry) result.append(1);
 
-            if (carry) value.append(1);
-
-            return new BigInteger(value.reverse().toString());
+            return new BigInteger(result.reverse().toString());
         }
 
         private BigInteger subtractImpl(BigInteger x) {
@@ -150,29 +132,11 @@ public class BOJ2408 {
             }
 
             StringBuilder result = new StringBuilder();
-            int i;
             boolean borrowing = false;
-            for (i = 0; i < Math.min(value.length(), x.value.length()); i++) {
-                int digit = (value.charAt(value.length() - 1 - i) - '0')
-                        - (x.value.charAt(x.value.length() - 1 - i) - '0');
-                digit -= (borrowing ? 1 : 0);
-                borrowing = digit < 0;
-                result.append(borrowing ? digit + 10 : digit);
-            }
-
-            while (i < value.length()) {
-                int digit = value.charAt(value.length() - 1 - i) - '0';
-                digit -= (borrowing ? 1 : 0);
-                borrowing = digit < 0;
-                result.append(borrowing ? digit + 10 : digit);
-                i++;
-            }
-            while (i < x.value.length()) {
-                int digit = x.value.charAt(x.value.length() - 1 - i) - '0';
-                digit -= (borrowing ? 1 : 0);
-                borrowing = digit < 0;
-                result.append(borrowing ? digit + 10 : digit);
-                i++;
+            for (int i = 0; i < Math.max(value.length(), x.value.length()); i++) {
+                int diff = getDigitFromRight(value, i) - getDigitFromRight(x.value, i) - (borrowing ? 1 : 0);
+                borrowing = diff < 0;
+                result.append(borrowing ? diff + 10 : diff);
             }
 
             while (result.length() > 1 && result.charAt(result.length() - 1) == '0') {
@@ -207,7 +171,7 @@ public class BOJ2408 {
                 result = result.add(new BigInteger(currStr.toString()));
             }
 
-            return new BigInteger(result.value, calcSign(this, x));
+            return new BigInteger(result.value, calculateSign(this, x));
         }
 
         public BigInteger divide(BigInteger x) {
@@ -243,7 +207,7 @@ public class BOJ2408 {
                 value.deleteCharAt(0);
             }
 
-            int sign = calcSign(this, x);
+            int sign = calculateSign(this, x);
             if (sign == MINUS && !remainder.equals(BigInteger.valueOf(0))) {
                 return new BigInteger(new BigInteger(value.toString()).add(BigInteger.valueOf(1)).value, sign);
             }
@@ -251,7 +215,12 @@ public class BOJ2408 {
             return new BigInteger(value.toString(), sign);
         }
 
-        private static int calcSign(BigInteger a, BigInteger b) {
+        private int getDigitFromRight(String number, int position) {
+            if (position >= number.length()) return 0;
+            return number.charAt(number.length() - 1 - position) - '0';
+        }
+
+        private static int calculateSign(BigInteger a, BigInteger b) {
             return a.sign * b.sign;
         }
 
