@@ -6,22 +6,48 @@ import java.util.List;
 import java.util.StringTokenizer;
 
 public class BOJ20303 {
-    private static int numChild, numRelation, threshold, answer;
+    private static int numChild, numRelation, threshold;
     private static int[] candies, parents;
     private static boolean[] visited;
     private static List<List<Integer>> graph;
+    private static final List<Integer> weights = new ArrayList<>(), values = new ArrayList<>();
 
     public static void main(String[] args) throws IOException {
         initialize();
 
-        List<Integer> weights = new ArrayList<>();
-        List<Integer> values = new ArrayList<>();
+        divideIntoGroupsAndCollectTheirInfo();
+
+        int[][] memo = knapsack();
+
+        printAnswer(memo);
+    }
+
+    private static void divideIntoGroupsAndCollectTheirInfo() {
         for (int i = 0; i < numChild; i++) {
             if (visited[i]) continue;
-            Result result = dfs(i);
-            weights.add(result.personCount);
-            values.add(result.candyCount);
+            DFSResult dfsResult = dfs(i);
+            weights.add(dfsResult.personCount);
+            values.add(dfsResult.candyCount);
         }
+    }
+
+    private static DFSResult dfs(int curr) {
+        int candyCount = candies[curr];
+        int personCount = 1;
+
+        visited[curr] = true;
+        for (int friend : graph.get(curr)) {
+            if (find(curr) == find(friend)) continue;
+            union(curr, friend);
+            DFSResult result = dfs(friend);
+            personCount += result.personCount;
+            candyCount += result.candyCount;
+        }
+
+        return new DFSResult(candyCount, personCount);
+    }
+
+    private static int[][] knapsack() {
         int[][] memo = new int[values.size()][threshold];
         if (weights.get(0) < threshold) {
             memo[0][weights.get(0)] = values.get(0);
@@ -36,38 +62,16 @@ public class BOJ20303 {
                 }
             }
         }
+        return memo;
+    }
 
+    private static void printAnswer(int[][] memo) {
         int answer = 0;
         for (int i = 0; i < values.size(); i++) {
             answer = Math.max(answer, memo[i][threshold - 1]);
         }
 
         System.out.println(answer);
-    }
-
-    private static Result dfs(int curr) {
-        int candyCount = candies[curr];
-        int personCount = 1;
-
-        visited[curr] = true;
-        for (int friend : graph.get(curr)) {
-            if (find(curr) == find(friend)) continue;
-            union(curr, friend);
-            Result result = dfs(friend);
-            personCount += result.personCount;
-            candyCount += result.candyCount;
-        }
-
-        return new Result(candyCount, personCount);
-    }
-
-    private static class Result {
-        int candyCount, personCount;
-
-        public Result(int candyCount, int personCount) {
-            this.candyCount = candyCount;
-            this.personCount = personCount;
-        }
     }
 
     private static int find(int x) {
@@ -106,6 +110,14 @@ public class BOJ20303 {
             parents[i] = i;
         }
         visited = new boolean[numChild];
-        answer = 0;
+    }
+
+    private static class DFSResult {
+        int candyCount, personCount;
+
+        public DFSResult(int candyCount, int personCount) {
+            this.candyCount = candyCount;
+            this.personCount = personCount;
+        }
     }
 }
