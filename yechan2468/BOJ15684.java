@@ -5,7 +5,8 @@ import java.util.StringTokenizer;
 
 public class BOJ15684 {
     static int numColumn, numBridge, numRow, answer;
-    static boolean[][] bridges, visited;
+    static boolean[][] bridges;
+    static final int MAX_DEPTH = 3;
     
     public static void main(String[] args) throws IOException {
         initialize();
@@ -21,7 +22,7 @@ public class BOJ15684 {
     }
 
     private static void dfs(int lastTriedRow, int depth) {
-        if (depth >= 4) return;
+        if (depth > MAX_DEPTH) return;
         if (validate()) answer = Math.min(answer, depth);
 
         for (int i = lastTriedRow; i < numRow; i++) {
@@ -79,7 +80,6 @@ public class BOJ15684 {
             int column = Integer.parseInt(tokenizer.nextToken()) - 1;
             bridges[row][column] = true;
         }
-        visited = new boolean[numRow][numColumn - 1];
         answer = Integer.MAX_VALUE;
     }
 }
