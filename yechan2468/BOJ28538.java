@@ -4,89 +4,104 @@ import java.util.Comparator;
 import java.util.StringTokenizer;
 
 public class BOJ28538 {
-    static int n;
-    static Point[] originalPoints;
-    static Point[] points;
-
     public static void main(String[] args) throws IOException {
-        readInput();
+        Point[] points = readInput();
 
-        points = Arrays.copyOf(originalPoints, n);
-
-        Node kdTree = buildKDTree(0, n - 1, 0);
+        KDTree kdTree = new KDTree(points);
 
         StringBuilder builder = new StringBuilder();
-        for (int i = 0; i < n; i++) {
-            FindResult result = new FindResult(-1, Integer.MAX_VALUE);
-            kdTree.findClosest(originalPoints[i], result);
-            builder.append(result.id).append(" ");
+        for (Point point : points) {
+            int id = kdTree.findClosest(point);
+            builder.append(id).append(" ");
         }
 
         System.out.println(builder);
     }
 
-    private static Node buildKDTree(int start, int end, int depth) {
-        if (start > end) return null;
+    private static class KDTree {
+        Point[] points;
+        private final Node head;
+        private Point query;
+        private FindResult best;
 
-        Comparator<Point> comparator = isTargetAxisX(depth) ?
-                Comparator.comparingInt(p -> p.x) :
-                Comparator.comparingInt(p -> p.y);
-
-        Arrays.sort(points, start, end + 1, comparator);
-
-        int mid = start + (end - start) / 2;
-
-        Node node = new Node(points[mid], depth);
-
-        node.left = buildKDTree(start, mid - 1, depth + 1);
-        node.right = buildKDTree(mid + 1, end, depth + 1);
-
-        return node;
-    }
-
-    private static class Node {
-        Point curr;
-        Node left = null, right = null;
-        int depth;
-
-        public Node(Point p, int depth) {
-            this.curr = p;
-            this.depth = depth;
+        public KDTree(Point[] points) {
+            this.points = Arrays.copyOf(points, points.length);
+            this.head = build(0, points.length - 1, 0);
         }
 
-        private void findClosest(Point query, FindResult best) {
-            if (curr.id != query.id) {
-                int dist = getDistance(curr, query);
-                if (dist < best.minDistance) {
-                    best.minDistance = dist;
-                    best.id = curr.id;
-                }
+        public Node build(int start, int end, int depth) {
+            if (start > end) return null;
+
+            Comparator<Point> comparator = BOJ28538.isAxisX(depth) ?
+                    Comparator.comparingInt(p -> p.x) :
+                    Comparator.comparingInt(p -> p.y);
+
+            Arrays.sort(points, start, end + 1, comparator);
+
+            int mid = start + (end - start) / 2;
+
+            Node node = new Node(points[mid], depth);
+
+            node.left = build(start, mid - 1, depth + 1);
+            node.right = build(mid + 1, end, depth + 1);
+
+            return node;
+        }
+
+        public int findClosest(Point query) {
+            this.query = query;
+            this.best = new FindResult(-1, Integer.MAX_VALUE);
+
+            findClosest(head);
+
+            return best.id;
+        }
+
+        private void findClosest(Node curr) {
+            if (curr.point.id != query.id) {
+                updateBestUsingCurrent(curr);
             }
 
-            Node nearChild = isTargetChildLeft(query) ? left : right;
-            Node farChild = (nearChild == left) ? right : left;
+            Node nearChild = getTargetChild(curr);
+            if (nearChild != null) {
+                findClosest(nearChild);
+            }
 
-            if (nearChild != null) nearChild.findClosest(query, best);
-
-            long axisDist = isTargetAxisX(depth)
-                    ? Math.abs(query.x - curr.x)
-                    : Math.abs(query.y - curr.y);
-
-            if (farChild != null && axisDist < best.minDistance) {
-                farChild.findClosest(query, best);
+            Node farChild = (nearChild == curr.left) ? curr.right : curr.left;
+            boolean isAbleToPrune = (farChild == null || getAxisDistance(curr) >= best.minDistance);
+            if (!isAbleToPrune) {
+                findClosest(farChild);
             }
         }
 
-        private boolean isTargetChildLeft(Point p) {
-            if (isTargetAxisX(depth)) {
-                return p.x <= curr.x;
+        private void updateBestUsingCurrent(Node curr) {
+            int dist = getDistance(curr.point, query);
+            if (dist < best.minDistance) {
+                best.minDistance = dist;
+                best.id = curr.point.id;
+            }
+        }
+
+        private Node getTargetChild(Node curr) {
+            if (isAxisX(curr)) {
+                return query.x <= curr.point.x ? curr.left : curr.right;
             } else {
-                return p.y <= curr.y;
+                return query.y <= curr.point.y ? curr.left : curr.right;
             }
+        }
+
+        private int getAxisDistance(Node curr) {
+            return isAxisX(curr)
+                    ? Math.abs(query.x - curr.point.x)
+                    : Math.abs(query.y - curr.point.y);
+        }
+
+        private boolean isAxisX(Node curr) {
+            return curr.depth % 2 == 0;
         }
     }
 
-    private static boolean isTargetAxisX(int depth) {
+    private static boolean isAxisX(int depth) {
         return depth % 2 == 0;
     }
 
@@ -94,8 +109,19 @@ public class BOJ28538 {
         return Math.abs(p1.x - p2.x) + Math.abs(p1.y - p2.y);
     }
 
+    private static class Node {
+        Point point;
+        Node left = null, right = null;
+        int depth;
+
+        public Node(Point p, int depth) {
+            this.point = p;
+            this.depth = depth;
+        }
+    }
+
     private static class Point {
-        public int id, x, y;
+        public final int id, x, y;
 
         public Point(int id, int x, int y) {
             this.id = id;
@@ -114,15 +140,17 @@ public class BOJ28538 {
         }
     }
 
-    private static void readInput() throws IOException {
+    private static Point[] readInput() throws IOException {
         BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
-        n = Integer.parseInt(reader.readLine());
-        originalPoints = new Point[n];
+        int n = Integer.parseInt(reader.readLine());
+        Point[] points = new Point[n];
         for (int i = 0; i < n; i++) {
             StringTokenizer tokenizer = new StringTokenizer(reader.readLine());
             int x = Integer.parseInt(tokenizer.nextToken());
             int y = Integer.parseInt(tokenizer.nextToken());
-            originalPoints[i] = new Point(i + 1, x, y);
+            points[i] = new Point(i + 1, x, y);
         }
+
+        return points;
     }
 }
