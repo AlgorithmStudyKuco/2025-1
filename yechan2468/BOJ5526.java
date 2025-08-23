@@ -4,47 +4,60 @@ import java.io.InputStreamReader;
 import java.util.*;
 
 public class BOJ5526 {
+    private static int numArea, limit;
+    private static long[] points;
+
     public static void main(String[] args) throws IOException {
-        BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
-        StringTokenizer tokenizer = new StringTokenizer(reader.readLine());
-        int numArea = Integer.parseInt(tokenizer.nextToken());
-        int limit = Integer.parseInt(tokenizer.nextToken());
-        long[] points = new long[numArea];
-        for (int i = 0; i < numArea; i++) {
-            points[i] = Integer.parseInt(reader.readLine());
-        }
+        getInput();
 
-        List<Long> combinations = new ArrayList<>();
-        combinations.add(0L);
-        for (int i = 0; i < numArea; i++) {
-            combinations.add(points[i]);
-        }
-        int length = combinations.size();
-        for (int i = 0; i < length; i++) {
-            for (int j = 0; j < length; j++) {
-                combinations.add(combinations.get(i) + combinations.get(j));
-            }
-        }
-
-        Set<Long> combinationSet = new HashSet<>(combinations);
-        combinations = new ArrayList<>(combinationSet);
-        Collections.sort(combinations);
+        List<Long> sumOfTwoDarts = getSumOfTwoDarts();
 
         long answer = 0;
-        for (long i : combinations) {
-            long target = limit - i;
-            int index = Collections.binarySearch(combinations, target);
+        for (long i : sumOfTwoDarts) {
+            int index = Collections.binarySearch(sumOfTwoDarts, limit - i);
 
             if (index < 0) {
                 index = -index - 2;
             }
 
-            if (0 <= index && index < combinations.size()) {
-                long targetValue = combinations.get(index);
-                answer = Math.max(answer, i + targetValue);
+            if (0 <= index && index < sumOfTwoDarts.size()) {
+                answer = Math.max(answer, i + sumOfTwoDarts.get(index));
             }
         }
 
         System.out.println(answer);
+    }
+
+    private static List<Long> getSumOfTwoDarts() {
+        List<Long> result = new ArrayList<>();
+        result.add(0L);
+        for (int i = 0; i < numArea; i++) {
+            result.add(points[i]);
+        }
+        for (int i = 0; i <= points.length; i++) {
+            for (int j = 0; j <= points.length; j++) {
+                long sum = result.get(i) + result.get(j);
+                if (sum <= limit) {
+                    result.add(sum);
+                }
+            }
+        }
+
+        HashSet<Long> resultSet = new HashSet<>(result);
+        result = new ArrayList<>(resultSet);
+        Collections.sort(result);
+
+        return result;
+    }
+
+    private static void getInput() throws IOException {
+        BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
+        StringTokenizer tokenizer = new StringTokenizer(reader.readLine());
+        numArea = Integer.parseInt(tokenizer.nextToken());
+        limit = Integer.parseInt(tokenizer.nextToken());
+        points = new long[numArea];
+        for (int i = 0; i < numArea; i++) {
+            points[i] = Integer.parseInt(reader.readLine());
+        }
     }
 }
