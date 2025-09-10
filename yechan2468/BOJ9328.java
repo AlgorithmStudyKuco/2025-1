@@ -57,7 +57,7 @@ public class BOJ9328 {
                 int nx = pos.col + dx[i];
                 if (ny < 0 || height <= ny || nx < 0 || width <= nx) continue;
                 if (visited[ny][nx]) continue;
-                if (isDoor(board[ny][nx]) && !keys.contains(lower(board[ny][nx]))) continue;
+                if (isDoor(board[ny][nx])) continue;
 
                 queue.offer(new Pos(ny, nx));
             }
@@ -89,7 +89,7 @@ public class BOJ9328 {
     private static boolean canEnter(int row, int col) {
         char cell = board[row][col];
         if (cell == WALL) return false;
-        if (isDoor(cell) && !keys.contains(lower(cell))) return false;
+        if (isDoor(cell)) return false;
         return true;
     }
 
