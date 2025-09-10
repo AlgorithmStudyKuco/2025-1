@@ -46,10 +46,10 @@ public class BOJ9328 {
             char curr = board[pos.row][pos.col];
             if (curr == TARGET) {
                 answer++;
-                board[pos.row][pos.col] = BLANK;
+                setCellBlank(pos);
             } else if (isKey(curr)) {
                 keys.add(curr);
-                board[pos.row][pos.col] = BLANK;
+                setCellBlank(pos);
             }
 
             for (int i = 0; i < 4; i++) {
@@ -68,27 +68,29 @@ public class BOJ9328 {
         Queue<Pos> queue = new LinkedList<>();
 
         for (int i = 0; i < height; i++) {
-            if (!visited[i][0] && board[i][0] != WALL &&
-                    !(isDoor(board[i][0]) && !keys.contains(lower(board[i][0])))) {
-                queue.offer(new Pos(i, 0));
-            }
-            if (!visited[i][width - 1] && board[i][width - 1] != WALL &&
-                    !(isDoor(board[i][width - 1]) && !keys.contains(lower(board[i][width - 1])))) {
-                queue.offer(new Pos(i, width - 1));
-            }
+            addToQueueIfValid(queue, i, 0);
+            addToQueueIfValid(queue, i, width - 1);
         }
 
         for (int i = 0; i < width; i++) {
-            if (!visited[0][i] && board[0][i] != WALL &&
-                    !(isDoor(board[0][i]) && !keys.contains(lower(board[0][i])))) {
-                queue.offer(new Pos(0, i));
-            }
-            if (!visited[height - 1][i] && board[height - 1][i] != WALL &&
-                    !(isDoor(board[height - 1][i]) && !keys.contains(lower(board[height - 1][i])))) {
-                queue.offer(new Pos(height - 1, i));
-            }
+            addToQueueIfValid(queue, 0, i);
+            addToQueueIfValid(queue, height - 1, i);
         }
+
         return queue;
+    }
+
+    private static void addToQueueIfValid(Queue<Pos> queue, int row, int col) {
+        if (!visited[row][col] && canEnter(row, col)) {
+            queue.offer(new Pos(row, col));
+        }
+    }
+
+    private static boolean canEnter(int row, int col) {
+        char cell = board[row][col];
+        if (cell == WALL) return false;
+        if (isDoor(cell) && !keys.contains(lower(cell))) return false;
+        return true;
     }
 
     private static void openDoor() {
@@ -140,6 +142,10 @@ public class BOJ9328 {
         }
     }
 
+    private static void setCellBlank(Pos pos) {
+        board[pos.row][pos.col] = BLANK;
+    }
+
     private static boolean isKey(char x) {
         return 'a' <= x && x <= 'z';
     }
@@ -154,16 +160,6 @@ public class BOJ9328 {
 
     private static char lower(char uppercase) {
         return (char) (uppercase - 'A' + 'a');
-    }
-
-    private static class Door {
-        Pos pos;
-        char id;
-
-        public Door(char id, Pos pos) {
-            this.id = id;
-            this.pos = pos;
-        }
     }
 
     private static class Pos {
