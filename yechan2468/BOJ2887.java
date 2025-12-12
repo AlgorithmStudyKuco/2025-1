@@ -4,51 +4,63 @@ import java.io.InputStreamReader;
 import java.util.*;
 
 public class BOJ2887 {
+    private static int n;
+    private static Node[][] coordinates;
     private static int[] parents;
 
     public static void main(String[] args) throws IOException {
-        BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
-        int n = Integer.parseInt(reader.readLine());
-        Node[] x = new Node[n];
-        Node[] y = new Node[n];
-        Node[] z = new Node[n];
-        for (int i = 0; i < n; i++) {
-            StringTokenizer tokenizer = new StringTokenizer(reader.readLine());
-            x[i] = new Node(Integer.parseInt(tokenizer.nextToken()), i);
-            y[i] = new Node(Integer.parseInt(tokenizer.nextToken()), i);
-            z[i] = new Node(Integer.parseInt(tokenizer.nextToken()), i);
-        }
-        Arrays.sort(x, Comparator.comparingInt(node -> node.value));
-        Arrays.sort(y, Comparator.comparingInt(node -> node.value));
-        Arrays.sort(z, Comparator.comparingInt(node -> node.value));
-        List<Delta> deltas = new ArrayList<>();
-        for (int i = 1; i < n; i++) {
-            Node prevX = x[i - 1], currX = x[i];
-            Node prevY = y[i - 1], currY = y[i];
-            Node prevZ = z[i - 1], currZ= z[i];
-            Delta deltaX = new Delta(Math.abs(prevX.value - currX.value), prevX.nodeNo, currX.nodeNo);
-            Delta deltaY = new Delta(Math.abs(prevY.value - currY.value), prevY.nodeNo, currY.nodeNo);
-            Delta deltaZ = new Delta(Math.abs(prevZ.value - currZ.value), prevZ.nodeNo, currZ.nodeNo);
-            deltas.add(deltaX);
-            deltas.add(deltaY);
-            deltas.add(deltaZ);
-        }
-        parents = new int[n];
-        for (int i = 0; i < n; i++) {
-            parents[i] = i;
+        initialize();
+
+        List<Delta> edges = getEdges();
+
+        int answer = prim(edges);
+
+        System.out.println(answer);
+    }
+
+    private static List<Delta> getEdges() {
+        for (Node[] axisValues : coordinates) {
+            Arrays.sort(axisValues, Comparator.comparingInt(node -> node.value));
         }
 
+        List<Delta> edges = new ArrayList<>();
+        for (int i = 1; i < n; i++) {
+            for (Node[] axisValues : coordinates) {
+                Node prev = axisValues[i - 1], curr = axisValues[i];
+                Delta delta = new Delta(Math.abs(prev.value - curr.value), prev.nodeNo, curr.nodeNo);
+                edges.add(delta);
+            }
+        }
+        edges.sort(Comparator.comparingInt(delta -> delta.deltaValue));
+        return edges;
+    }
+
+    private static int prim(List<Delta> edges) {
         int answer = 0;
-        deltas.sort(Comparator.comparingInt(delta -> delta.deltaValue));
-        for (Delta delta : deltas) {
+        for (Delta delta : edges) {
             if (find(delta.node1No) == find(delta.node2No)) {
                 continue;
             }
             union(delta.node1No, delta.node2No);
             answer += delta.deltaValue;
         }
+        return answer;
+    }
 
-        System.out.println(answer);
+    private static void initialize() throws IOException {
+        BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
+        n = Integer.parseInt(reader.readLine());
+        coordinates = new Node[3][n];
+        parents = new int[n];
+        for (int i = 0; i < n; i++) {
+            parents[i] = i;
+        }
+        for (int i = 0; i < n; i++) {
+            StringTokenizer tokenizer = new StringTokenizer(reader.readLine());
+            for (Node[] axis : coordinates) {
+                axis[i] = new Node(Integer.parseInt(tokenizer.nextToken()), i);
+            }
+        }
     }
 
     private static class Node {
