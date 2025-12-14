@@ -25,7 +25,7 @@ vector<int> kmp(const string& t, const string& p) {
     while (j > 0 && t[i] != p[j]) j = pi[j - 1];
     if (t[i] == p[j]) {
       if (j == m - 1) {
-        positions.push_back(i - m + 2); // 1-based index
+        positions.push_back(i - m + 2);
         j = pi[j];
       }
       else {
