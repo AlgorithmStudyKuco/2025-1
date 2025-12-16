@@ -1,0 +1,119 @@
+
+name: Auto PR to Study Repository
+
+on:
+  push:
+    branches:
+      - master 
+      - main
+
+jobs:
+  pull-request:
+    runs-on: ubuntu-latest
+    
+    env:
+     STUDY_REPO: "AlgorithmStudyKuco/2025-1"  # 1. 스터디 공용 저장소 주소
+     USER_NAME: "hjuohj1022"                  # 2. 본인 GitHub ID (브랜치명 등에 사용)
+     USER_EMAIL: "hjuohj@gmail.com"           # 3. 본인 GitHub 이메일 (커밋 기록용)
+     USER_FOLDER: "hjuohj1022"                # 4. 스터디 저장소 내 본인 폴더 이름
+     GH_TOKEN: ${{ secrets.my_token }}
+
+    steps:
+      - name: Checkout My Repo
+        uses: actions/checkout@v3
+        with:
+          path: my-repo
+          fetch-depth: 0 
+
+      - name: Checkout Study Repo
+        uses: actions/checkout@v3
+        with:
+          repository: ${{ env.STUDY_REPO }}
+          token: ${{ env.GH_TOKEN }}
+          path: study-repo
+
+      - name: Detect Problem Info
+        id: problem
+        run: |
+          cd my-repo
+          git config --global core.quotePath false
+          
+          CHANGED_FILE=$(git diff --name-only HEAD^ HEAD | grep -E '\.(cc|cpp|py|java|c|js|ts|swift|go|kt|rs)$' | head -n 1)
+          
+          echo "Changed File: $CHANGED_FILE"
+          
+          if [ -z "$CHANGED_FILE" ]; then
+            echo "No source file changed."
+            echo "is_problem=false" >> $GITHUB_OUTPUT
+            echo "number=$(date +'%Y-%m-%d')" >> $GITHUB_OUTPUT
+            echo "folder_path=." >> $GITHUB_OUTPUT
+          else
+            DIR_PATH=$(dirname "$CHANGED_FILE")
+            DIR_NAME=$(basename "$DIR_PATH")
+            EXTRACTED_NUM=$(echo "$DIR_NAME" | cut -d. -f1)
+            
+            if [[ "$EXTRACTED_NUM" =~ ^[0-9]+$ ]]; then
+              PROBLEM_NUM=$EXTRACTED_NUM
+              IS_PROBLEM="true"
+            else
+              PROBLEM_NUM=$(date +'%Y-%m-%d')
+              IS_PROBLEM="false"
+            fi
+            
+            echo "number=$PROBLEM_NUM" >> $GITHUB_OUTPUT
+            echo "is_problem=$IS_PROBLEM" >> $GITHUB_OUTPUT
+            echo "folder_path=$DIR_PATH" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Copy Specific Problem & Push
+        run: |
+          cd study-repo
+          git config user.name "${{ env.USER_NAME }}"
+          git config user.email "${{ env.USER_EMAIL }}"
+          
+          BRANCH_NAME="${{ env.USER_NAME }}/${{ steps.problem.outputs.number }}"
+          
+          git checkout main
+          git branch -D $BRANCH_NAME || true
+          git checkout -b $BRANCH_NAME
+          
+          SOURCE_PATH="${{ steps.problem.outputs.folder_path }}"
+          TARGET_DIR="./${{ env.USER_FOLDER }}"
+          
+          if [ -d "../my-repo/$SOURCE_PATH" ]; then
+            PARENT_DIR=$(dirname "$SOURCE_PATH")
+            mkdir -p "$TARGET_DIR/$PARENT_DIR"
+            
+            cp -r "../my-repo/$SOURCE_PATH" "$TARGET_DIR/$PARENT_DIR/"
+          else
+            mkdir -p "$TARGET_DIR"
+            cp -r ../my-repo/* "$TARGET_DIR/"
+          fi
+          
+          git add .
+          
+          if git diff-index --quiet HEAD; then
+            echo "No changes to commit"
+          else
+            git commit -m "Solve: ${{ steps.problem.outputs.number }} 문제 풀이"
+            git push -f origin $BRANCH_NAME
+          fi
+
+      - name: Create Pull Request
+        run: |
+          cd study-repo
+          
+          if [ "${{ steps.problem.outputs.is_problem }}" == "true" ]; then
+            PR_TITLE="BOJ ${{ steps.problem.outputs.number }}"
+          else
+            PR_TITLE="[Update] ${{ steps.problem.outputs.number }}"
+          fi
+          
+          PR_BODY="Problem: https://www.acmicpc.net/problem/${{ steps.problem.outputs.number }}"
+          
+          gh pr create \
+            --title "$PR_TITLE" \
+            --body "$PR_BODY" \
+            --base main \
+            --head "${{ env.USER_NAME }}/${{ steps.problem.outputs.number }}" \
+            || echo "PR already exists"
