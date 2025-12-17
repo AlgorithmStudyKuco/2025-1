@@ -61,8 +61,7 @@ public class BOJ16724 {
         Point a = find(r1, c1);
         Point b = find(r2, c2);
         if (a.equals(b)) return;
-        b.row = a.row;
-        b.col = a.col;
+        b = a;
     }
 
     private static Point find(int r, int c) {
